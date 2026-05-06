@@ -175,6 +175,19 @@ function main() {
     console.log(`   version: ${oldVer} -> ${rootPkg.version}`);
   }
 
+  // For mac/win: create stub main entry so forge validation passes.
+  // The real code is in app.asar which we copy in packageAfterCopy.
+  if (!isLinux) {
+    const stubDir = path.join(SRC, ".vite", "build");
+    fs.mkdirSync(stubDir, { recursive: true });
+    fs.writeFileSync(path.join(stubDir, "bootstrap.js"), "// stub - real code in app.asar\n");
+    // Also need package.json in src/ for forge
+    const asarPkg = path.join(asarContentDir, "package.json");
+    if (fs.existsSync(asarPkg)) {
+      fs.copyFileSync(asarPkg, path.join(SRC, "package.json"));
+    }
+  }
+
   // Write build mode marker for forge.config.js
   const marker = path.join(SRC, ".build-mode");
   fs.writeFileSync(marker, isLinux ? "linux" : "upstream-asar");

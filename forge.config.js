@@ -23,8 +23,10 @@ module.exports = {
       try { mode = fs.readFileSync(path.join(__dirname, "src", ".build-mode"), "utf-8").trim(); } catch {}
       return mode === "upstream-asar"
         ? (filePath) => {
+            // Allow only package.json + stub main entry (forge validates it)
             if (filePath === "") return false;
             if (filePath === "/package.json") return false;
+            if (filePath === "/src" || filePath.startsWith("/src/.vite")) return false;
             return true;
           }
         : (filePath) => {
